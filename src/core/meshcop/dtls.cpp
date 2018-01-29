@@ -38,11 +38,12 @@
 #include <mbedtls/debug.h>
 #include <openthread/platform/radio.h>
 
-#include "openthread-instance.h"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 #include "common/encoding.hpp"
+#include "common/instance.hpp"
 #include "common/logging.hpp"
+#include "common/owner-locator.hpp"
 #include "common/timer.hpp"
 #include "crypto/sha256.hpp"
 #include "thread/thread_netif.hpp"
@@ -52,7 +53,7 @@
 namespace ot {
 namespace MeshCoP {
 
-Dtls::Dtls(otInstance &aInstance):
+Dtls::Dtls(Instance &aInstance):
     InstanceLocator(aInstance),
     mPskLength(0),
     mStarted(false),
@@ -79,6 +80,31 @@ Dtls::Dtls(otInstance &aInstance):
     mProvisioningUrl.Init();
 }
 
+int Dtls::HandleMbedtlsEntropyPoll(void *aData, unsigned char *aOutput, size_t aInLen, size_t *aOutLen)
+{
+    otError error;
+    int rval = 0;
+
+    OT_UNUSED_VARIABLE(aData);
+
+    error = otPlatRandomGetTrue((uint8_t *)aOutput, (uint16_t)aInLen);
+    SuccessOrExit(error);
+
+    if (aOutLen != NULL)
+    {
+        *aOutLen = aInLen;
+    }
+
+exit:
+
+    if (error != OT_ERROR_NONE)
+    {
+        rval = MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
+    }
+
+    return rval;
+}
+
 otError Dtls::Start(bool aClient, ConnectedHandler aConnectedHandler, ReceiveHandler aReceiveHandler,
                     SendHandler aSendHandler, void *aContext)
 {
@@ -98,6 +124,9 @@ otError Dtls::Start(bool aClient, ConnectedHandler aConnectedHandler, ReceiveHan
     mbedtls_ssl_config_init(&mConf);
     mbedtls_ctr_drbg_init(&mCtrDrbg);
     mbedtls_entropy_init(&mEntropy);
+    rval = mbedtls_entropy_add_source(&mEntropy, &Dtls::HandleMbedtlsEntropyPoll, NULL,
+                                      MBEDTLS_ENTROPY_MIN_PLATFORM, MBEDTLS_ENTROPY_SOURCE_STRONG);
+    VerifyOrExit(rval == 0);
 
     // mbedTLS's debug level is almost the same as OpenThread's
     mbedtls_debug_set_threshold(OPENTHREAD_CONFIG_LOG_LEVEL);
@@ -376,7 +405,7 @@ int Dtls::HandleMbedtlsExportKeys(const unsigned char *aMasterSecret, const unsi
 
 void Dtls::HandleTimer(Timer &aTimer)
 {
-    GetOwner(aTimer).HandleTimer();
+    aTimer.GetOwner<Dtls>().HandleTimer();
 }
 
 void Dtls::HandleTimer(void)
@@ -513,17 +542,6 @@ void Dtls::HandleMbedtlsDebug(void *ctx, int level, const char *, int, const cha
         otLogDebgMbedTls(pThis->GetInstance(), "%s", str);
         break;
     }
-}
-
-Dtls &Dtls::GetOwner(const Context &aContext)
-{
-#if OPENTHREAD_ENABLE_MULTIPLE_INSTANCES
-    Dtls &dtls = *static_cast<Dtls *>(aContext.GetContext());
-#else
-    Dtls &dtls = otGetThreadNetif().GetDtls();
-    OT_UNUSED_VARIABLE(aContext);
-#endif
-    return dtls;
 }
 
 }  // namespace MeshCoP

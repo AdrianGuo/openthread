@@ -58,7 +58,7 @@ public:
      * This constructor initializes the object.
      *
      */
-    PanIdQueryClient(otInstance &aInstance);
+    explicit PanIdQueryClient(Instance &aInstance);
 
     /**
      * This method sends a PAN ID Query message.

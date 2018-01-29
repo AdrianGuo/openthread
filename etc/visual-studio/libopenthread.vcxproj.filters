@@ -129,6 +129,9 @@
     <ClCompile Include="..\..\src\core\coap\coap_secure.cpp">
       <Filter>Source Files\coap</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\common\instance.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\core\common\locator.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -136,6 +139,9 @@
       <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\common\message.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\common\notifier.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\common\tasklet.cpp">
@@ -211,6 +217,12 @@
       <Filter>Source Files\thread</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\thread\mesh_forwarder.cpp">
+      <Filter>Source Files\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\thread\mesh_forwarder_ftd.cpp">
+      <Filter>Source Files\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\thread\mesh_forwarder_mtd.cpp">
       <Filter>Source Files\thread</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\thread\mle.cpp">
@@ -353,6 +365,9 @@
     <ClInclude Include="..\..\src\core\common\encoding.hpp">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\core\common\instance.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\core\common\locator.hpp">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -360,6 +375,9 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\common\message.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\common\notifier.hpp">
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\common\new.hpp">

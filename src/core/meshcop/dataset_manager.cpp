@@ -46,8 +46,10 @@
 #include "common/code_utils.hpp"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
+#include "common/instance.hpp"
 #include "common/logging.hpp"
 #include "common/timer.hpp"
+#include "common/owner-locator.hpp"
 #include "meshcop/dataset.hpp"
 #include "meshcop/leader.hpp"
 #include "meshcop/meshcop.hpp"
@@ -59,7 +61,7 @@
 namespace ot {
 namespace MeshCoP {
 
-DatasetManager::DatasetManager(otInstance &aInstance, const Tlv::Type aType, const char *aUriSet,
+DatasetManager::DatasetManager(Instance &aInstance, const Tlv::Type aType, const char *aUriSet,
                                const char *aUriGet, Timer::Handler aTimerHandler):
     InstanceLocator(aInstance),
     mNetwork(aType),
@@ -101,6 +103,7 @@ const Tlv *DatasetManager::GetTlv(Tlv::Type aType) const
 otError DatasetManager::ApplyConfiguration(void)
 {
     ThreadNetif &netif = GetNetif();
+    Mac::Mac &mac = netif.GetMac();
     otError error = OT_ERROR_NONE;
     Dataset datasetLocal(mLocal.GetType());
     Dataset *dataset;
@@ -126,22 +129,49 @@ otError DatasetManager::ApplyConfiguration(void)
         {
         case Tlv::kChannel:
         {
-            const ChannelTlv *channel = static_cast<const ChannelTlv *>(cur);
-            netif.GetMac().SetChannel(static_cast<uint8_t>(channel->GetChannel()));
+            uint8_t channel = static_cast<uint8_t>(static_cast<const ChannelTlv *>(cur)->GetChannel());
+
+            if (mac.GetChannel() != channel)
+            {
+                error = mac.SetChannel(channel);
+
+                if (error != OT_ERROR_NONE)
+                {
+                    otLogWarnMeshCoP(GetInstance(),
+                                     "DatasetManager::ApplyConfiguration() Failed to set channel to %d (%s)",
+                                     channel, otThreadErrorToString(error));
+                    ExitNow();
+                }
+
+                GetNotifier().SetFlags(OT_CHANGED_THREAD_CHANNEL);
+            }
+
             break;
         }
 
         case Tlv::kPanId:
         {
-            const PanIdTlv *panid = static_cast<const PanIdTlv *>(cur);
-            netif.GetMac().SetPanId(panid->GetPanId());
+            uint16_t panid = static_cast<const PanIdTlv *>(cur)->GetPanId();
+
+            if (mac.GetPanId() != panid)
+            {
+                mac.SetPanId(panid);
+                GetNotifier().SetFlags(OT_CHANGED_THREAD_PANID);
+            }
+
             break;
         }
 
         case Tlv::kExtendedPanId:
         {
             const ExtendedPanIdTlv *extpanid = static_cast<const ExtendedPanIdTlv *>(cur);
-            netif.GetMac().SetExtendedPanId(extpanid->GetExtendedPanId());
+
+            if (memcmp(mac.GetExtendedPanId(), extpanid->GetExtendedPanId(), OT_EXT_PAN_ID_SIZE) != 0)
+            {
+                mac.SetExtendedPanId(extpanid->GetExtendedPanId());
+                GetNotifier().SetFlags(OT_CHANGED_THREAD_EXT_PANID);
+            }
+
             break;
         }
 
@@ -151,7 +181,13 @@ otError DatasetManager::ApplyConfiguration(void)
             otNetworkName networkName;
             memcpy(networkName.m8, name->GetNetworkName(), name->GetLength());
             networkName.m8[name->GetLength()] = '\0';
-            netif.GetMac().SetNetworkName(networkName.m8);
+
+            if (strcmp(networkName.m8, mac.GetNetworkName()) != 0)
+            {
+                mac.SetNetworkName(networkName.m8);
+                GetNotifier().SetFlags(OT_CHANGED_THREAD_NETWORK_NAME);
+            }
+
             break;
         }
 
@@ -197,6 +233,7 @@ otError DatasetManager::ApplyConfiguration(void)
         cur = cur->GetNext();
     }
 
+exit:
     return error;
 }
 
@@ -948,18 +985,7 @@ exit:
     }
 }
 
-static ActiveDatasetBase &GetActiveDatasetOwner(const Context &aContext)
-{
-#if OPENTHREAD_ENABLE_MULTIPLE_INSTANCES
-    ActiveDatasetBase &activeDataset = *static_cast<ActiveDatasetBase *>(aContext.GetContext());
-#else
-    ActiveDatasetBase &activeDataset = otGetThreadNetif().GetActiveDataset();
-    OT_UNUSED_VARIABLE(aContext);
-#endif
-    return activeDataset;
-}
-
-ActiveDatasetBase::ActiveDatasetBase(otInstance &aInstance):
+ActiveDatasetBase::ActiveDatasetBase(Instance &aInstance):
     DatasetManager(aInstance, Tlv::kActiveTimestamp, OT_URI_PATH_ACTIVE_SET, OT_URI_PATH_ACTIVE_GET,
                    &ActiveDatasetBase::HandleTimer),
     mResourceGet(OT_URI_PATH_ACTIVE_GET, &ActiveDatasetBase::HandleGet, this)
@@ -1043,21 +1069,10 @@ void ActiveDatasetBase::HandleGet(Coap::Header &aHeader, Message &aMessage, cons
 
 void ActiveDatasetBase::HandleTimer(Timer &aTimer)
 {
-    GetActiveDatasetOwner(aTimer).HandleTimer();
+    aTimer.GetOwner<ActiveDatasetBase>().HandleTimer();
 }
 
-static PendingDatasetBase &GetPendingDatasetOwner(const Context &aContext)
-{
-#if OPENTHREAD_ENABLE_MULTIPLE_INSTANCES
-    PendingDatasetBase &pendingDataset = *static_cast<PendingDatasetBase *>(aContext.GetContext());
-#else
-    PendingDatasetBase &pendingDataset = otGetThreadNetif().GetPendingDataset();
-    OT_UNUSED_VARIABLE(aContext);
-#endif
-    return pendingDataset;
-}
-
-PendingDatasetBase::PendingDatasetBase(otInstance &aInstance):
+PendingDatasetBase::PendingDatasetBase(Instance &aInstance):
     DatasetManager(aInstance, Tlv::kPendingTimestamp, OT_URI_PATH_PENDING_SET, OT_URI_PATH_PENDING_GET,
                    &PendingDatasetBase::HandleTimer),
     mDelayTimer(aInstance, &PendingDatasetBase::HandleDelayTimer, this),
@@ -1144,7 +1159,7 @@ void PendingDatasetBase::StartDelayTimer(void)
 
 void PendingDatasetBase::HandleDelayTimer(Timer &aTimer)
 {
-    GetPendingDatasetOwner(aTimer).HandleDelayTimer();
+    aTimer.GetOwner<PendingDatasetBase>().HandleDelayTimer();
 }
 
 void PendingDatasetBase::HandleDelayTimer(void)
@@ -1190,7 +1205,7 @@ void PendingDatasetBase::HandleGet(Coap::Header &aHeader, Message &aMessage, con
 
 void PendingDatasetBase::HandleTimer(Timer &aTimer)
 {
-    GetPendingDatasetOwner(aTimer).HandleTimer();
+    aTimer.GetOwner<PendingDatasetBase>().HandleTimer();
 }
 
 }  // namespace MeshCoP

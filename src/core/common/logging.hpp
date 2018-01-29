@@ -58,14 +58,6 @@
 extern "C" {
 #endif
 
-#ifndef WINDOWS_LOGGING
-#define otLogFuncEntry()
-#define otLogFuncEntryMsg(aFormat, ...)
-#define otLogFuncExit()
-#define otLogFuncExitMsg(aFormat, ...)
-#define otLogFuncExitErr(error)
-#endif
-
 /**
  * @def otLogCrit
  *
@@ -1517,7 +1509,7 @@ const char *otLogRegionToString(otLogRegion aRegion);
 /**
 * Local/private macro to format the log message
 */
-#define _otLogFormatter(aInstance, aLogLevel, aRegion, aFormat, ...)         \
+#define _otLogFormatter(aInstance, aLogLevel, aRegion, aFormat, ...)        \
     _otDynamicLog(                                                          \
         aInstance,                                                          \
         aLogLevel,                                                          \

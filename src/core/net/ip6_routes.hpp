@@ -80,7 +80,7 @@ public:
      * @param[in]  aInstance  A reference to the OpenThread instance.
      *
      */
-    Routes(otInstance &aInstance);
+    explicit Routes(Instance &aInstance);
 
     /**
      * This method adds an IPv6 route.

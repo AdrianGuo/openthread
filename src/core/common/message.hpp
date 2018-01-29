@@ -218,6 +218,7 @@ public:
         kSubTypeMleGeneral             = 6,  ///< General MLE
         kSubTypeJoinerFinalizeResponse = 7,  ///< Joiner Finalize Response
         kSubTypeMleChildUpdateRequest  = 8,  ///< MLE Child Update Request
+        kSubTypeMleDataResponse        = 9,  ///< MLE Data Response
     };
 
     enum
@@ -1140,7 +1141,7 @@ public:
      * This constructor initializes the object.
      *
      */
-    MessagePool(otInstance &aInstance);
+    explicit MessagePool(Instance &aInstance);
 
     /**
      * This method is used to obtain a new message. The default priority `kDefaultMessagePriority`
@@ -1187,7 +1188,7 @@ public:
      *
      */
 #if OPENTHREAD_CONFIG_PLATFORM_MESSAGE_MANAGEMENT
-    uint16_t GetFreeBufferCount(void) const { return otPlatMessagePoolNumFreeBuffers(&GetInstance()); }
+    uint16_t GetFreeBufferCount(void) const;
 #else
     uint16_t GetFreeBufferCount(void) const { return mNumFreeBuffers; }
 #endif

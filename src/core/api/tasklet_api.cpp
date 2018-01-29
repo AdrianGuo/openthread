@@ -37,28 +37,30 @@
 
 #include <openthread/tasklet.h>
 
-#include "openthread-instance.h"
 #include "common/code_utils.hpp"
+#include "common/instance.hpp"
 #include "common/logging.hpp"
 
 using namespace ot;
 
 void otTaskletsProcess(otInstance *aInstance)
 {
-    otLogFuncEntry();
+    Instance &instance = *static_cast<Instance *>(aInstance);
+
     VerifyOrExit(otInstanceIsInitialized(aInstance));
-    aInstance->mTaskletScheduler.ProcessQueuedTasklets();
+    instance.GetTaskletScheduler().ProcessQueuedTasklets();
 
 exit:
-    otLogFuncExit();
+    return;
 }
 
 bool otTaskletsArePending(otInstance *aInstance)
 {
     bool retval = false;
+    Instance &instance = *static_cast<Instance *>(aInstance);
 
     VerifyOrExit(otInstanceIsInitialized(aInstance));
-    retval = aInstance->mTaskletScheduler.AreTaskletsPending();
+    retval = instance.GetTaskletScheduler().AreTaskletsPending();
 
 exit:
     return retval;

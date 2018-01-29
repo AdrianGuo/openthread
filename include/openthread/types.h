@@ -54,18 +54,6 @@ extern "C" {
 #else
 #include <windows.h>
 #endif
-#else
-#ifndef CONTAINING_RECORD
-/*#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winvalid-offsetof"
-#define CONTAINING_RECORD(address, type, field) \
-    ((type *)((uint8_t*)(address) - offsetof(type, field)))
-#pragma GCC diagnostic pop*/
-#define BASE 0x1
-#define myoffsetof(s,m) (((size_t)&(((s*)BASE)->m))-BASE)
-#define CONTAINING_RECORD(address, type, field) \
-    ((type *)((uint8_t*)(address) - myoffsetof(type, field)))
-#endif /* CONTAINING_RECORD */
 #endif /* _WIN32 */
 
 /**
@@ -79,19 +67,19 @@ extern "C" {
  */
 
 /**
- * This type represents the OpenThread instance structure.
+ * This structure represents the OpenThread instance structure.
  */
 typedef struct otInstance otInstance;
 
 #ifdef OTDLL
 
 /**
- * This type represents the handle to the OpenThread API.
+ * This structure represents the handle to the OpenThread API.
  */
 typedef struct otApiInstance otApiInstance;
 
 /**
- * This type represents a list of device GUIDs.
+ * This structure represents a list of device GUIDs.
  */
 typedef struct otDeviceList
 {
@@ -273,6 +261,11 @@ typedef enum otError
     OT_ERROR_DISABLED_FEATURE = 33,
 
     /**
+     * The link margin was too low.
+     */
+    OT_ERROR_LINK_MARGIN_LOW = 34,
+
+    /**
      * Generic error (should not use).
      */
     OT_ERROR_GENERIC = 255,
@@ -300,7 +293,7 @@ struct otMasterKey
 } OT_TOOL_PACKED_END;
 
 /**
- * This type represents a Thread Master Key.
+ * This structure represents a Thread Master Key.
  *
  */
 typedef struct otMasterKey otMasterKey;
@@ -396,13 +389,22 @@ typedef uint16_t otShortAddress;
 #define OT_EXT_ADDRESS_SIZE        8   ///< Size of an IEEE 802.15.4 Extended Address (bytes)
 
 /**
- * This type represents the IEEE 802.15.4 Extended Address.
+ * @struct otExtAddress
+ *
+ * This structure represents the IEEE 802.15.4 Extended Address.
  *
  */
-typedef struct otExtAddress
+OT_TOOL_PACKED_BEGIN
+struct otExtAddress
 {
     uint8_t m8[OT_EXT_ADDRESS_SIZE];  ///< IEEE 802.15.4 Extended Address bytes
-} otExtAddress;
+} OT_TOOL_PACKED_END;
+
+/**
+ * This structure represents the IEEE 802.15.4 Extended Address.
+ *
+ */
+typedef struct otExtAddress otExtAddress;
 
 #define OT_IP6_PREFIX_SIZE         8   ///< Size of an IPv6 prefix (bytes)
 #define OT_IP6_ADDRESS_SIZE        16  ///< Size of an IPv6 address (bytes)
@@ -425,7 +427,7 @@ struct otIp6Address
 } OT_TOOL_PACKED_END;
 
 /**
- * This type represents an IPv6 address.
+ * This structure represents an IPv6 address.
  *
  */
 typedef struct otIp6Address otIp6Address;
@@ -474,7 +476,7 @@ typedef struct otMessageInfo
 } otMessageInfo;
 
 /**
- * This type points to an OpenThread message buffer.
+ * This structure points to an OpenThread message buffer.
  */
 typedef struct otMessage
 {
@@ -516,7 +518,7 @@ typedef struct otSteeringData
 } otSteeringData;
 
 /**
- * This struct represents a received IEEE 802.15.4 Beacon.
+ * This structure represents a received IEEE 802.15.4 Beacon.
  *
  */
 typedef struct otActiveScanResult
@@ -536,7 +538,7 @@ typedef struct otActiveScanResult
 } otActiveScanResult;
 
 /**
- * This struct represents an energy scan result.
+ * This structure represents an energy scan result.
  *
  */
 typedef struct otEnergyScanResult
@@ -667,30 +669,6 @@ typedef struct otLinkModeConfig
 } otLinkModeConfig;
 
 /**
- * This enumeration represents flags that indicate what configuration or state has changed within OpenThread.
- *
- */
-enum
-{
-    OT_CHANGED_IP6_ADDRESS_ADDED            = 1 << 0,   ///< IPv6 address was added
-    OT_CHANGED_IP6_ADDRESS_REMOVED          = 1 << 1,   ///< IPv6 address was removed
-    OT_CHANGED_THREAD_ROLE                  = 1 << 2,   ///< Role (disabled, detached, child, router, leader) changed
-    OT_CHANGED_THREAD_LL_ADDR               = 1 << 3,   ///< The link-local address changed
-    OT_CHANGED_THREAD_ML_ADDR               = 1 << 4,   ///< The mesh-local address changed
-    OT_CHANGED_THREAD_RLOC_ADDED            = 1 << 5,   ///< RLOC was added
-    OT_CHANGED_THREAD_RLOC_REMOVED          = 1 << 6,   ///< RLOC was removed
-    OT_CHANGED_THREAD_PARTITION_ID          = 1 << 7,   ///< Partition ID changed
-    OT_CHANGED_THREAD_KEY_SEQUENCE_COUNTER  = 1 << 8,   ///< Thread Key Sequence changed
-    OT_CHANGED_THREAD_NETDATA               = 1 << 9,   ///< Thread Network Data changed
-    OT_CHANGED_THREAD_CHILD_ADDED           = 1 << 10,  ///< Child was added
-    OT_CHANGED_THREAD_CHILD_REMOVED         = 1 << 11,  ///< Child was removed
-    OT_CHANGED_IP6_MULTICAST_SUBSRCRIBED    = 1 << 12,  ///< Subscribed to a IPv6 multicast address
-    OT_CHANGED_IP6_MULTICAST_UNSUBSRCRIBED  = 1 << 13,  ///< Unsubscribed from a IPv6 multicast address
-    OT_CHANGED_COMMISSIONER_STATE           = 1 << 14,  ///< Commissioner state changed
-    OT_CHANGED_JOINER_STATE                 = 1 << 15,  ///< Joiner state changed
-};
-
-/**
  * This structure represents an IPv6 prefix.
  */
 OT_TOOL_PACKED_BEGIN
@@ -701,7 +679,7 @@ struct otIp6Prefix
 } OT_TOOL_PACKED_END;
 
 /**
- * This type represents an IPv6 prefix.
+ * This structure represents an IPv6 prefix.
  */
 typedef struct otIp6Prefix otIp6Prefix;
 
@@ -720,7 +698,7 @@ typedef struct otBorderRouterConfig
     otIp6Prefix mPrefix;
 
     /**
-     * A 2-bit signed integer indicating router preference as defined in RFC 4291.
+     * A 2-bit signed integer indicating router preference as defined in RFC 4191.
      */
     int mPreference : 2;
 
@@ -783,7 +761,7 @@ typedef struct otExternalRouteConfig
     uint16_t mRloc16;
 
     /**
-     * A 2-bit signed integer indicating router preference as defined in RFC 4291.
+     * A 2-bit signed integer indicating router preference as defined in RFC 4191.
      */
     int mPreference : 2;
 
@@ -812,18 +790,8 @@ typedef enum otRoutePreference
     OT_ROUTE_PREFERENCE_HIGH = 1,   ///< High route preference.
 } otRoutePreference;
 
-enum
-{
-    /**
-     * Maximum size of Service Data in bytes.
-     */
-    kMaxServiceDataSize = 252,
-
-    /**
-     * Maximum size of Server Data in bytes. This is theoretical limit, practical one is much lower.
-     */
-    kMaxServerDataSize = 248,
-};
+#define OT_SERVICE_DATA_MAX_SIZE 252    ///< Maximum size of Service Data in bytes.
+#define OT_SERVER_DATA_MAX_SIZE  248    ///< Maximum size of Server Data in bytes. This is theoretical limit, practical one is much lower.
 
 /**
  * This structure represents a Server configuration.
@@ -843,7 +811,7 @@ typedef struct otServerConfig
     /**
      * Server data bytes
      */
-    uint8_t mServerData[kMaxServerDataSize];
+    uint8_t mServerData[OT_SERVER_DATA_MAX_SIZE];
 
     /**
      * The Server Rloc.
@@ -857,6 +825,11 @@ typedef struct otServerConfig
 typedef struct otServiceConfig
 {
     /**
+     * Service ID. This field is used to return service ID when iterating over network data from leader.
+     */
+    uint8_t mServiceID;
+
+    /**
      * IANA Enterprise Number.
      */
     uint32_t mEnterpriseNumber;
@@ -869,8 +842,11 @@ typedef struct otServiceConfig
     /**
      * Service data bytes
      */
-    uint8_t mServiceData[kMaxServiceDataSize];
+    uint8_t mServiceData[OT_SERVICE_DATA_MAX_SIZE];
 
+    /**
+     * The Server configuration.
+     */
     otServerConfig mServerConfig;
 } otServiceConfig;
 
@@ -960,7 +936,12 @@ typedef struct
     bool           mSecureDataRequest : 1; ///< Secure Data Requests
     bool           mFullFunction : 1;      ///< Full Function Device
     bool           mFullNetworkData : 1;   ///< Full Network Data
+    bool           mIsStateRestoring : 1;  ///< Is in restoring state
 } otChildInfo;
+
+#define OT_CHILD_IP6_ADDRESS_ITERATOR_INIT  0   ///< Initializer for otChildIP6AddressIterator
+
+typedef uint16_t otChildIp6AddressIterator;     ///< Used to iterate through IPv6 addresses of a Thread Child entry.
 
 /**
  * This structure holds diagnostic information for a Thread Router
@@ -1036,7 +1017,7 @@ typedef struct otMacCounters
     uint32_t mRxAddressFiltered;      ///< The number of received packets filtered by address filter (whitelist or blacklist).
     uint32_t mRxDestAddrFiltered;     ///< The number of received packets filtered by destination check.
     uint32_t mRxDuplicated;           ///< The number of received duplicated packets.
-    uint32_t mRxErrNoFrame;           ///< The number of received packets that do not contain contents.
+    uint32_t mRxErrNoFrame;           ///< The number of received packets with no or malformed content.
     uint32_t mRxErrUnknownNeighbor;   ///< The number of received packets from unknown neighbor.
     uint32_t mRxErrInvalidSrcAddr;    ///< The number of received packets whose source address is invalid.
     uint32_t mRxErrSec;               ///< The number of received packets with security error.
@@ -1182,7 +1163,7 @@ typedef void (OTCALL *otDeviceAvailabilityChangedCallback)(bool aAdded, const GU
 typedef uint8_t otLogLevel;
 
 /**
- * This enum represents log regions.
+ * This enumeration represents log regions.
  *
  */
 typedef enum otLogRegion

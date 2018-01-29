@@ -337,7 +337,7 @@ public:
      * @param[in]  aContext   A pointer to arbitrary context information (used along with timer handler).
      *
      */
-    ResponsesQueue(otInstance &aInstance, Timer::Handler aHandler, void *aContext);
+    ResponsesQueue(Instance &aInstance, Timer::Handler aHandler, void *aContext);
 
     /**
      * Add given response to the cache.
@@ -610,6 +610,8 @@ public:
     /**
      * This method aborts CoAP transactions associated with given handler and context.
      *
+     * The associated response handler will be called with OT_ERROR_ABORT.
+     *
      * @param[in]  aHandler  A function pointer that should be called when the transaction ends.
      * @param[in]  aContext  A pointer to arbitrary context information.
      *
@@ -656,7 +658,7 @@ protected:
      * @param[in]  aResponsesQueueTimerHandler    A timer handler provided by sub-class for `mReponsesQueue` timer.
      *
      */
-    CoapBase(otInstance &aInstance, Timer::Handler aRetransmissionTimerHandler,
+    CoapBase(Instance &aInstance, Timer::Handler aRetransmissionTimerHandler,
              Timer::Handler aResponsesQueueTimerHandler);
 
     /**
@@ -747,10 +749,9 @@ public:
      * @param[in] aInstance      A reference to the OpenThread instance.
      *
      */
-    Coap(otInstance &aInstance);
+    explicit Coap(Instance &aInstance);
 
 private:
-    static Coap &GetOwner(const Context &aContext);
     static void HandleRetransmissionTimer(Timer &aTimer);
     static void HandleResponsesQueueTimer(Timer &aTimer);
 };
@@ -770,10 +771,9 @@ public:
      * @param[in] aInstance      A reference to the OpenThread instance.
      *
      */
-    ApplicationCoap(otInstance &aInstance);
+    explicit ApplicationCoap(Instance &aInstance);
 
 private:
-    static ApplicationCoap &GetOwner(const Context &aContext);
     static void HandleRetransmissionTimer(Timer &aTimer);
     static void HandleResponsesQueueTimer(Timer &aTimer);
 };

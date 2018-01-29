@@ -41,6 +41,7 @@
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 #include "common/encoding.hpp"
+#include "common/instance.hpp"
 #include "common/logging.hpp"
 #include "common/message.hpp"
 #include "common/timer.hpp"
@@ -56,7 +57,7 @@ using ot::Encoding::BigEndian::HostSwap16;
 namespace ot {
 namespace NetworkData {
 
-LeaderBase::LeaderBase(otInstance &aInstance):
+LeaderBase::LeaderBase(Instance &aInstance):
     NetworkData(aInstance, false)
 {
     Reset();
@@ -67,7 +68,7 @@ void LeaderBase::Reset(void)
     mVersion = static_cast<uint8_t>(otPlatRandomGet());
     mStableVersion = static_cast<uint8_t>(otPlatRandomGet());
     mLength = 0;
-    GetNetif().SetStateChangedFlags(OT_CHANGED_THREAD_NETDATA);
+    GetNotifier().SetFlags(OT_CHANGED_THREAD_NETDATA);
 }
 
 otError LeaderBase::GetContext(const Ip6::Address &aAddress, Lowpan::Context &aContext)
@@ -422,7 +423,7 @@ void LeaderBase::SetNetworkData(uint8_t aVersion, uint8_t aStableVersion, bool a
 
     otDumpDebgNetData(GetInstance(), "set network data", mTlvs, mLength);
 
-    GetNetif().SetStateChangedFlags(OT_CHANGED_THREAD_NETDATA);
+    GetNotifier().SetFlags(OT_CHANGED_THREAD_NETDATA);
 }
 
 otError LeaderBase::SetCommissioningData(const uint8_t *aValue, uint8_t aValueLength)
@@ -445,7 +446,7 @@ otError LeaderBase::SetCommissioningData(const uint8_t *aValue, uint8_t aValueLe
     }
 
     mVersion++;
-    GetNetif().SetStateChangedFlags(OT_CHANGED_THREAD_NETDATA);
+    GetNotifier().SetFlags(OT_CHANGED_THREAD_NETDATA);
 
 exit:
     return error;

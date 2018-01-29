@@ -40,6 +40,7 @@
 #include "coap/coap_header.hpp"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
+#include "common/instance.hpp"
 #include "common/logging.hpp"
 #include "common/encoding.hpp"
 #include "mac/mac_frame.hpp"
@@ -59,7 +60,7 @@ namespace ot {
 
 namespace NetworkDiagnostic {
 
-NetworkDiagnostic::NetworkDiagnostic(otInstance &aInstance) :
+NetworkDiagnostic::NetworkDiagnostic(Instance &aInstance) :
     InstanceLocator(aInstance),
     mDiagnosticGetRequest(OT_URI_PATH_DIAGNOSTIC_GET_REQUEST, &NetworkDiagnostic::HandleDiagnosticGetRequest, this),
     mDiagnosticGetQuery(OT_URI_PATH_DIAGNOSTIC_GET_QUERY, &NetworkDiagnostic::HandleDiagnosticGetQuery, this),
@@ -292,7 +293,7 @@ otError NetworkDiagnostic::FillRequestedTlvs(Message &aRequest, Message &aRespon
         {
             ExtMacAddressTlv tlv;
             tlv.Init();
-            tlv.SetMacAddr(*netif.GetMac().GetExtAddress());
+            tlv.SetMacAddr(netif.GetMac().GetExtAddress());
             SuccessOrExit(error = aResponse.Append(&tlv, sizeof(tlv)));
             break;
         }

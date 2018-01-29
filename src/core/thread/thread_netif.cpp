@@ -34,9 +34,9 @@
 
 #include "thread_netif.hpp"
 
-#include "openthread-instance.h"
 #include "common/code_utils.hpp"
 #include "common/encoding.hpp"
+#include "common/instance.hpp"
 #include "common/message.hpp"
 #include "net/ip6.hpp"
 #include "net/netif.hpp"
@@ -57,7 +57,7 @@ static const otMasterKey kThreadMasterKey =
     }
 };
 
-ThreadNetif::ThreadNetif(otInstance &aInstance):
+ThreadNetif::ThreadNetif(Instance &aInstance):
     Netif(aInstance, OT_NETIF_INTERFACE_ID_THREAD),
     mCoap(aInstance),
 #if OPENTHREAD_ENABLE_DHCP6_CLIENT
@@ -67,7 +67,7 @@ ThreadNetif::ThreadNetif(otInstance &aInstance):
     mDhcp6Server(aInstance),
 #endif  // OPENTHREAD_ENABLE_DHCP6_SERVER
 #if OPENTHREAD_ENABLE_DNS_CLIENT
-    mDnsClient(aInstance.mThreadNetif),
+    mDnsClient(aInstance.GetThreadNetif()),
 #endif  // OPENTHREAD_ENABLE_DNS_CLIENT
     mActiveDataset(aInstance),
     mPendingDataset(aInstance),
@@ -83,6 +83,7 @@ ThreadNetif::ThreadNetif(otInstance &aInstance):
 #if OPENTHREAD_FTD || OPENTHREAD_ENABLE_MTD_NETWORK_DIAGNOSTIC
     mNetworkDiagnostic(aInstance),
 #endif
+    mIsUp(false),
 #if OPENTHREAD_ENABLE_COMMISSIONER && OPENTHREAD_FTD
     mCommissioner(aInstance),
 #endif  // OPENTHREAD_ENABLE_COMMISSIONER && OPENTHREAD_FTD
@@ -125,6 +126,9 @@ otError ThreadNetif::Up(void)
 #if OPENTHREAD_ENABLE_DNS_CLIENT
         mDnsClient.Start();
 #endif
+#if OPENTHREAD_ENABLE_CHANNEL_MONITOR
+        GetInstance().GetChannelMonitor().Start();
+#endif
         mChildSupervisor.Start();
         mMleRouter.Enable();
         mIsUp = true;
@@ -138,6 +142,9 @@ otError ThreadNetif::Down(void)
     mCoap.Stop();
 #if OPENTHREAD_ENABLE_DNS_CLIENT
     mDnsClient.Stop();
+#endif
+#if OPENTHREAD_ENABLE_CHANNEL_MONITOR
+    GetInstance().GetChannelMonitor().Stop();
 #endif
     mChildSupervisor.Stop();
     mMleRouter.Disable();
@@ -158,7 +165,7 @@ otError ThreadNetif::GetLinkAddress(Ip6::LinkAddress &address) const
 {
     address.mType = Ip6::LinkAddress::kEui64;
     address.mLength = sizeof(address.mExtAddress);
-    memcpy(&address.mExtAddress, mMac.GetExtAddress(), address.mLength);
+    address.mExtAddress = mMac.GetExtAddress();
     return OT_ERROR_NONE;
 }
 

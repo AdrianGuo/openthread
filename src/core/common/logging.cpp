@@ -37,6 +37,8 @@
 
 #include <openthread/openthread.h>
 
+#include "common/instance.hpp"
+
 /*
  * Verify debug uart dependency.
  *
@@ -406,6 +408,10 @@ const char *otThreadErrorToString(otError aError)
 
     case OT_ERROR_GENERIC:
         retval = "GenericError";
+        break;
+
+    case OT_ERROR_LINK_MARGIN_LOW:
+        retval = "LinkMarginLow";
         break;
 
     default:

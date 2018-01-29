@@ -36,6 +36,7 @@
 #include <stdio.h>
 
 #include "common/code_utils.hpp"
+#include "common/instance.hpp"
 #include "utils/wrap_string.h"
 
 namespace ot {
@@ -46,6 +47,18 @@ static const char *const kDigitsString[8] =
     // 0/8,  1/8,   2/8,   3/8,   4/8,   5/8,   6/8,   7/8
     "0",     "125", "25",  "375", "5",   "625", "75",  "875"
 };
+
+void SuccessRateTracker::AddSample(bool aSuccess, uint16_t aWeight)
+{
+    uint32_t oldAverage = mSuccessRate;
+    uint32_t newValue = (aSuccess) ? kMaxRateValue : 0;
+    uint32_t n = aWeight;
+
+    // `n/2` is added to the sum to ensure rounding the value to the nearest integer when dividing by `n`
+    // (e.g., 1.2 -> 1, 3.5 -> 4).
+
+    mSuccessRate = static_cast<uint16_t>(((oldAverage * (n - 1)) + newValue + (n / 2)) / n);
+}
 
 void RssAverager::Reset(void)
 {

@@ -90,6 +90,7 @@ libopenthread_mtd_a_CPPFLAGS        = \
 SOURCES_COMMON                      = \
     api/coap_api.cpp                  \
     api/commissioner_api.cpp          \
+    api/channel_monitor_api.cpp       \
     api/child_supervision_api.cpp     \
     api/crypto_api.cpp                \
     api/border_router_api.cpp         \
@@ -116,8 +117,10 @@ SOURCES_COMMON                      = \
     coap/coap_header.cpp              \
     coap/coap_secure.cpp              \
     common/crc16.cpp                  \
+    common/instance.cpp               \
     common/logging.cpp                \
     common/locator.cpp                \
+    common/notifier.cpp               \
     common/message.cpp                \
     common/tasklet.cpp                \
     common/timer.cpp                  \
@@ -144,9 +147,10 @@ SOURCES_COMMON                      = \
     meshcop/joiner.cpp                \
     meshcop/joiner_router.cpp         \
     meshcop/leader.cpp                \
+    meshcop/meshcop.cpp               \
+    meshcop/meshcop_tlvs.cpp          \
     meshcop/panid_query_client.cpp    \
     meshcop/timestamp.cpp             \
-    meshcop/meshcop_tlvs.cpp          \
     net/dhcp6_client.cpp              \
     net/dhcp6_server.cpp              \
     net/dns_client.cpp                \
@@ -167,6 +171,8 @@ SOURCES_COMMON                      = \
     thread/link_quality.cpp           \
     thread/lowpan.cpp                 \
     thread/mesh_forwarder.cpp         \
+    thread/mesh_forwarder_ftd.cpp     \
+    thread/mesh_forwarder_mtd.cpp     \
     thread/mle.cpp                    \
     thread/mle_router.cpp             \
     thread/network_data.cpp           \
@@ -179,6 +185,7 @@ SOURCES_COMMON                      = \
     thread/thread_netif.cpp           \
     thread/tmf_proxy.cpp              \
     thread/topology.cpp               \
+    utils/channel_monitor.cpp         \
     utils/child_supervision.cpp       \
     utils/jam_detector.cpp            \
     utils/missing_strlcpy.c           \
@@ -199,20 +206,20 @@ libopenthread_ftd_a_SOURCES         = \
 HEADERS_COMMON                      = \
     openthread-core-config.h          \
     openthread-core-default-config.h  \
-    openthread-instance.h             \
-    openthread-single-instance.h      \
     api/link_raw.hpp                  \
     coap/coap.hpp                     \
     coap/coap_header.hpp              \
     coap/coap_secure.hpp              \
     common/code_utils.hpp             \
-    common/context.hpp                \
     common/crc16.hpp                  \
     common/debug.hpp                  \
     common/encoding.hpp               \
+    common/instance.hpp               \
     common/locator.hpp                \
     common/logging.hpp                \
     common/message.hpp                \
+    common/notifier.hpp               \
+    common/owner-locator.hpp          \
     common/settings.hpp               \
     common/new.hpp                    \
     common/tasklet.hpp                \
@@ -242,9 +249,9 @@ HEADERS_COMMON                      = \
     meshcop/joiner_router.hpp         \
     meshcop/leader.hpp                \
     meshcop/meshcop.hpp               \
+    meshcop/meshcop_tlvs.hpp          \
     meshcop/panid_query_client.hpp    \
     meshcop/timestamp.hpp             \
-    meshcop/meshcop_tlvs.hpp          \
     net/dhcp6.hpp                     \
     net/dhcp6_client.hpp              \
     net/dhcp6_server.hpp              \
@@ -290,6 +297,7 @@ HEADERS_COMMON                      = \
     thread/thread_uri_paths.hpp       \
     thread/tmf_proxy.hpp              \
     thread/topology.hpp               \
+    utils/channel_monitor.hpp         \
     utils/child_supervision.hpp       \
     utils/slaac_address.hpp           \
     utils/jam_detector.hpp            \

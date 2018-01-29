@@ -66,7 +66,6 @@
 #include <openthread/icmp6.h>
 #include <openthread/platform/uart.h>
 
-#include "openthread-instance.h"
 #include "common/new.hpp"
 #include "net/ip6.hpp"
 #endif
@@ -136,7 +135,6 @@ const struct Command Interpreter::sCommands[] =
     { "extaddr", &Interpreter::ProcessExtAddress },
     { "extpanid", &Interpreter::ProcessExtPanId },
     { "factoryreset", &Interpreter::ProcessFactoryReset },
-    { "hashmacaddr", &Interpreter::ProcessHashMacAddress },
     { "ifconfig", &Interpreter::ProcessIfconfig },
 #ifdef OTDLL
     { "instance", &Interpreter::ProcessInstance },
@@ -148,6 +146,7 @@ const struct Command Interpreter::sCommands[] =
 #endif
 #if OPENTHREAD_ENABLE_JOINER
     { "joiner", &Interpreter::ProcessJoiner },
+    { "joinerid", &Interpreter::ProcessJoinerId },
 #endif
 #if OPENTHREAD_FTD
     { "joinerport", &Interpreter::ProcessJoinerPort },
@@ -217,8 +216,8 @@ const struct Command Interpreter::sCommands[] =
     { "singleton", &Interpreter::ProcessSingleton },
     { "state", &Interpreter::ProcessState },
     { "thread", &Interpreter::ProcessThread },
-    { "txpowermax", &Interpreter::ProcessTxPowerMax },
 #ifndef OTDLL
+    { "txpower", &Interpreter::ProcessTxPower },
     { "udp", &Interpreter::ProcessUdp },
 #endif
     { "version", &Interpreter::ProcessVersion },
@@ -252,7 +251,7 @@ typedef otPtr<const otNetifAddress> otNetifAddressPtr;
 typedef otPtr<const uint8_t> otBufferPtr;
 typedef otPtr<const char> otStringPtr;
 
-Interpreter::Interpreter(otInstance *aInstance):
+Interpreter::Interpreter(Instance *aInstance):
 #if OPENTHREAD_ENABLE_APPLICATION_COAP
     mCoap(*this),
 #endif
@@ -982,22 +981,6 @@ void Interpreter::ProcessFactoryReset(int argc, char *argv[])
     otInstanceFactoryReset(mInstance);
     OT_UNUSED_VARIABLE(argc);
     OT_UNUSED_VARIABLE(argv);
-}
-
-void Interpreter::ProcessHashMacAddress(int argc, char *argv[])
-{
-    otError error = OT_ERROR_NONE;
-    otExtAddress hashMacAddress;
-
-    VerifyOrExit(argc == 0, error = OT_ERROR_PARSE);
-
-    otLinkGetJoinerId(mInstance, &hashMacAddress);
-    OutputBytes(hashMacAddress.m8, OT_EXT_ADDRESS_SIZE);
-    mServer->OutputFormat("\r\n");
-
-exit:
-    OT_UNUSED_VARIABLE(argv);
-    AppendResult(error);
 }
 
 void Interpreter::ProcessIfconfig(int argc, char *argv[])
@@ -2635,24 +2618,37 @@ exit:
     AppendResult(error);
 }
 
-void Interpreter::ProcessTxPowerMax(int argc, char *argv[])
+#ifndef OTDLL
+void Interpreter::ProcessTxPower(int argc, char *argv[])
 {
     otError error = OT_ERROR_NONE;
-    long value;
 
     if (argc == 0)
     {
-        mServer->OutputFormat("%d dBm\r\n", otLinkGetMaxTransmitPower(mInstance));
+        int8_t power;
+
+        SuccessOrExit(error = otPlatRadioGetTransmitPower(mInstance, &power));
+        mServer->OutputFormat("%d dBm\r\n", power);
     }
     else
     {
+        long value;
+
         SuccessOrExit(error = ParseLong(argv[0], value));
-        otLinkSetMaxTransmitPower(mInstance, static_cast<int8_t>(value));
+        SuccessOrExit(error = otPlatRadioSetTransmitPower(mInstance, static_cast<int8_t>(value)));
     }
 
 exit:
     AppendResult(error);
 }
+
+void Interpreter::ProcessUdp(int argc, char *argv[])
+{
+    otError error;
+    error = mUdp.Process(argc, argv);
+    AppendResult(error);
+}
+#endif
 
 void Interpreter::ProcessVersion(int argc, char *argv[])
 {
@@ -2662,15 +2658,6 @@ void Interpreter::ProcessVersion(int argc, char *argv[])
     OT_UNUSED_VARIABLE(argc);
     OT_UNUSED_VARIABLE(argv);
 }
-
-#ifndef OTDLL
-void Interpreter::ProcessUdp(int argc, char *argv[])
-{
-    otError error;
-    error = mUdp.Process(argc, argv);
-    AppendResult(error);
-}
-#endif
 
 #if OPENTHREAD_ENABLE_COMMISSIONER && OPENTHREAD_FTD
 
@@ -2981,6 +2968,22 @@ void Interpreter::ProcessJoiner(int argc, char *argv[])
     }
 
 exit:
+    AppendResult(error);
+}
+
+void Interpreter::ProcessJoinerId(int argc, char *argv[])
+{
+    otError error = OT_ERROR_NONE;
+    otExtAddress joinerId;
+
+    VerifyOrExit(argc == 0, error = OT_ERROR_PARSE);
+
+    otJoinerGetId(mInstance, &joinerId);
+    OutputBytes(joinerId.m8, sizeof(joinerId));
+    mServer->OutputFormat("\r\n");
+
+exit:
+    OT_UNUSED_VARIABLE(argv);
     AppendResult(error);
 }
 
@@ -3533,13 +3536,13 @@ void Interpreter::SetUserCommands(const otCliCommand *aCommands, uint8_t aLength
     mUserCommandsLength = aLength;
 }
 
-Interpreter &Interpreter::GetOwner(const Context &aContext)
+Interpreter &Interpreter::GetOwner(OwnerLocator &aOwnerLocator)
 {
 #if OPENTHREAD_ENABLE_MULTIPLE_INSTANCES
-    Interpreter &interpreter = *static_cast<Interpreter *>(aContext.GetContext());
+    Interpreter &interpreter = (aOwnerLocator.GetOwner<Interpreter>());
 #else
     Interpreter &interpreter = Uart::sUartServer->GetInterpreter();
-    OT_UNUSED_VARIABLE(aContext);
+    OT_UNUSED_VARIABLE(aOwnerLocator);
 #endif
     return interpreter;
 }

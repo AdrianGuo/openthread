@@ -38,6 +38,7 @@
 
 #include "common/code_utils.hpp"
 #include "common/encoding.hpp"
+#include "common/instance.hpp"
 #include "mac/mac_frame.hpp"
 
 using ot::Encoding::BigEndian::HostSwap16;
@@ -45,6 +46,11 @@ using ot::Encoding::BigEndian::HostSwap32;
 
 namespace ot {
 namespace Ip6 {
+
+void Address::Clear(void)
+{
+    memset(mFields.m8, 0, sizeof(mFields));
+}
 
 bool Address::IsUnspecified(void) const
 {
@@ -134,7 +140,6 @@ bool Address::IsIidReserved(void) const
 {
     return IsSubnetRouterAnycast() || IsReservedSubnetAnycast() || IsAnycastRoutingLocator();
 }
-
 
 const uint8_t *Address::GetIid(void) const
 {

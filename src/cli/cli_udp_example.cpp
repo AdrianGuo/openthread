@@ -54,6 +54,12 @@ const struct UdpExample::Command UdpExample::sCommands[] =
     { "send", &UdpExample::ProcessSend }
 };
 
+UdpExample::UdpExample(Interpreter &aInterpreter):
+    mInterpreter(aInterpreter)
+{
+    memset(&mSocket, 0, sizeof(mSocket));
+}
+
 otError UdpExample::ProcessHelp(int argc, char *argv[])
 {
     for (unsigned int i = 0; i < sizeof(sCommands) / sizeof(sCommands[0]); i++)
@@ -84,6 +90,7 @@ otError UdpExample::ProcessBind(int argc, char *argv[])
     SuccessOrExit(error);
 
     sockaddr.mPort = static_cast<uint16_t>(value);
+    sockaddr.mScopeId = OT_NETIF_INTERFACE_ID_THREAD;
 
     error = otUdpBind(&mSocket, &sockaddr);
 
@@ -108,6 +115,7 @@ otError UdpExample::ProcessConnect(int argc, char *argv[])
     SuccessOrExit(error);
 
     sockaddr.mPort = static_cast<uint16_t>(value);
+    sockaddr.mScopeId = OT_NETIF_INTERFACE_ID_THREAD;
 
     error = otUdpConnect(&mSocket, &sockaddr);
 
@@ -153,6 +161,7 @@ otError UdpExample::ProcessSend(int argc, char *argv[])
         SuccessOrExit(error);
 
         messageInfo.mPeerPort = static_cast<uint16_t>(value);
+        messageInfo.mInterfaceId = OT_NETIF_INTERFACE_ID_THREAD;
     }
 
     message = otUdpNewMessage(mInterpreter.mInstance, true);

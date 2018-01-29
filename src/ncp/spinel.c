@@ -277,7 +277,7 @@ spinel_datatype_vunpack_(bool in_place, const uint8_t *data_ptr, spinel_size_t d
 
             if (arg_ptr)
             {
-                *arg_ptr = data_ptr[0];
+                *arg_ptr = data_ptr[0] != 0;
             }
 
             ret += sizeof(uint8_t);
@@ -1189,6 +1189,26 @@ spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
         ret = "PROP_JAM_DETECT_HISTORY_BITMAP";
         break;
 
+    case SPINEL_PROP_CHANNEL_MONITOR_SAMPLE_INTERVAL:
+        ret = "PROP_CHANNEL_MONITOR_SAMPLE_INTERVAL";
+        break;
+
+    case SPINEL_PROP_CHANNEL_MONITOR_RSSI_THRESHOLD:
+        ret = "PROP_CHANNEL_MONITOR_RSSI_THRESHOLD";
+        break;
+
+    case SPINEL_PROP_CHANNEL_MONITOR_SAMPLE_WINDOW:
+        ret = "PROP_CHANNEL_MONITOR_SAMPLE_WINDOW";
+        break;
+
+    case SPINEL_PROP_CHANNEL_MONITOR_SAMPLE_COUNT:
+        ret = "PROP_CHANNEL_MONITOR_SAMPLE_COUNT";
+        break;
+
+    case SPINEL_PROP_CHANNEL_MONITOR_CHANNEL_QUALITY:
+        ret = "PROP_CHANNEL_MONITOR_CHANNEL_QUALITY";
+        break;
+
     case SPINEL_PROP_MAC_SCAN_STATE:
         ret = "PROP_MAC_SCAN_STATE";
         break;
@@ -1267,6 +1287,10 @@ spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
 
     case SPINEL_PROP_MAC_FIXED_RSS:
         ret = "PROP_MAC_FIXED_RSS";
+        break;
+
+    case SPINEL_PROP_MAC_CCA_FAILURE_RATE:
+        ret = "PROP_MAC_CCA_FAILURE_RATE";
         break;
 
     case SPINEL_PROP_NET_SAVED:
@@ -1471,6 +1495,46 @@ spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
 
     case SPINEL_PROP_THREAD_ROUTER_TABLE:
         ret = "PROP_THREAD_ROUTER_TABLE";
+        break;
+
+    case SPINEL_PROP_THREAD_ACTIVE_DATASET:
+        ret = "PROP_THREAD_ACTIVE_DATASET";
+        break;
+
+    case SPINEL_PROP_THREAD_PENDING_DATASET:
+        ret = "PROP_THREAD_PENDING_DATASET";
+        break;
+
+    case SPINEL_PROP_THREAD_MGMT_ACTIVE_DATASET:
+        ret = "PROP_THREAD_MGMT_ACTIVE_DATASET";
+        break;
+
+    case SPINEL_PROP_THREAD_MGMT_PENDING_DATASET:
+        ret = "PROP_THREAD_MGMT_PENDING_DATASET";
+        break;
+
+    case SPINEL_PROP_DATASET_ACTIVE_TIMESTAMP:
+        ret = "PROP_DATASET_ACTIVE_TIMESTAMP";
+        break;
+
+    case SPINEL_PROP_DATASET_PENDING_TIMESTAMP:
+        ret = "PROP_DATASET_PENDING_TIMESTAMP";
+        break;
+
+    case SPINEL_PROP_DATASET_DELAY_TIMER:
+        ret = "PROP_DATASET_DELAY_TIMER";
+        break;
+
+    case SPINEL_PROP_DATASET_SECURITY_POLICY:
+        ret = "PROP_DATASET_SECURITY_POLICY";
+        break;
+
+    case SPINEL_PROP_DATASET_RAW_TLVS:
+        ret = "PROP_DATASET_RAW_TLVS";
+        break;
+
+    case SPINEL_PROP_THREAD_CHILD_TABLE_ADDRESSES:
+        ret = "PROP_THREAD_CHILD_TABLE_ADDRESSES";
         break;
 
     case SPINEL_PROP_IPV6_LL_ADDR:
@@ -1725,6 +1789,10 @@ spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
         ret = "PROP_MSG_BUFFER_COUNTERS";
         break;
 
+    case SPINEL_PROP_CNTR_ALL_MAC_COUNTERS:
+        ret = "PROP_CNTR_ALL_MAC_COUNTERS";
+        break;
+
     case SPINEL_PROP_NEST_STREAM_MFG:
         ret = "PROP_NEST_STREAM_MFG";
         break;
@@ -1743,6 +1811,10 @@ spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
 
     case SPINEL_PROP_DEBUG_NCP_LOG_LEVEL:
         ret = "PROP_DEBUG_NCP_LOG_LEVEL";
+        break;
+
+    case SPINEL_PROP_DEBUG_TEST_WATCHDOG:
+        ret = "PROP_DEBUG_TEST_WATCHDOG";
         break;
 
     default:
@@ -2054,6 +2126,10 @@ const char *spinel_capability_to_cstr(unsigned int capability)
 
     case SPINEL_CAP_OOB_STEERING_DATA:
         ret = "CAP_OOB_STEERING_DATA";
+        break;
+
+    case SPINEL_CAP_CHANNEL_MONITOR:
+        ret = "CAP_CHANNEL_MONITOR";
         break;
 
     case SPINEL_CAP_THREAD_COMMISSIONER:

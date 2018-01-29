@@ -116,13 +116,13 @@
 #endif
 
 /**
- * @def OPENTHREAD_CONFIG_DEFAULT_MAX_TRANSMIT_POWER
+ * @def OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER
  *
- * The default IEEE 802.15.4 maximum transmit power (dBm)
+ * The default IEEE 802.15.4 transmit power (dBm)
  *
  */
-#ifndef OPENTHREAD_CONFIG_DEFAULT_MAX_TRANSMIT_POWER
-#define OPENTHREAD_CONFIG_DEFAULT_MAX_TRANSMIT_POWER            0
+#ifndef OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER
+#define OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER                0
 #endif
 
 /**
@@ -229,6 +229,36 @@
  */
 #ifndef OPENTHREAD_CONFIG_ADDRESS_QUERY_MAX_RETRY_DELAY
 #define OPENTHREAD_CONFIG_ADDRESS_QUERY_MAX_RETRY_DELAY         28800
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
+ *
+ *  The maximum size of the CLI line in bytes
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
+#define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH                   128
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE
+ *
+ *  The size of CLI UART RX buffer in bytes
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE
+#define OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE               512
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_CLI_TX_BUFFER_SIZE
+ *
+ *  The size of CLI message buffer in bytes
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CLI_UART_TX_BUFFER_SIZE
+#define OPENTHREAD_CONFIG_CLI_UART_TX_BUFFER_SIZE               1024
 #endif
 
 /**
@@ -507,7 +537,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_LOG_OUTPUT
-#define OPENTHREAD_CONFIG_LOG_OUTPUT    OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+#define OPENTHREAD_CONFIG_LOG_OUTPUT                            OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
 #endif
 
 /** Log output goes to the bit bucket (disabled) */
@@ -774,6 +804,17 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_NCP_SPINEL_ENCRYPTER_EXTRA_DATA_SIZE
+ *
+ *  The size of extra data to be allocated in UART buffer,
+ *  needed by NCP Spinel Encrypter.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_NCP_SPINEL_ENCRYPTER_EXTRA_DATA_SIZE
+#define OPENTHREAD_CONFIG_NCP_SPINEL_ENCRYPTER_EXTRA_DATA_SIZE  0
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_PLATFORM_ASSERT_MANAGEMENT
  *
  * The assert is managed by platform defined logic when this flag is set.
@@ -826,7 +867,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_ENABLE_PLATFORM_USEC_TIMER
-#define OPENTHREAD_CONFIG_ENABLE_PLATFORM_USEC_TIMER    0
+#define OPENTHREAD_CONFIG_ENABLE_PLATFORM_USEC_TIMER            0
 #endif
 
 /**
@@ -882,7 +923,67 @@
 #define OPENTHREAD_CONFIG_ENABLE_STEERING_DATA_SET_OOB          0
 #endif
 
-/*
+/**
+ * @def OPENTHREAD_CONFIG_CCA_FAILURE_RATE_AVERAGING_WINDOW
+ *
+ * OpenThread's MAC implementation maintains the average failure rate of CCA (Clear Channel Assessment) operation on
+ * frame transmissions. This value specifies the window (in terms of number of transmissions or samples) over which the
+ * average rate is maintained. Practically, the average value can be considered as the percentage of CCA failures in
+ * (approximately) last AVERAGING_WINDOW frame transmissions.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CCA_FAILURE_RATE_AVERAGING_WINDOW
+#define OPENTHREAD_CONFIG_CCA_FAILURE_RATE_AVERAGING_WINDOW     512
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_CHANNEL_MONITOR_SAMPLE_INTERVAL
+ *
+ * The sample interval in milliseconds used by Channel Monitoring feature.
+
+ * When enabled, a zero-duration Energy Scan is performed, collecting a single RSSI sample per channel during each
+ * interval.
+ *
+ * Applicable only if Channel Monitoring feature is enabled (i.e., `OPENTHREAD_ENABLE_CHANNEL_MONITOR` is set).
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CHANNEL_MONITOR_SAMPLE_INTERVAL
+#define OPENTHREAD_CONFIG_CHANNEL_MONITOR_SAMPLE_INTERVAL       41000
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_CHANNEL_MONITOR_RSSI_THRESHOLD
+ *
+ * The RSSI threshold in dBm used by Channel Monitoring feature.
+ *
+ * The RSSI samples are compared with the given threshold. Channel monitoring reports the average rate of RSSI samples
+ * that are above this threshold within an observation window (per channel).
+ *
+ * It is recommended that this value is set to same value as the CCA threshold used by radio.
+ *
+ * Applicable only if Channel Monitoring feature is enabled (i.e., `OPENTHREAD_ENABLE_CHANNEL_MONITOR` is set).
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CHANNEL_MONITOR_RSSI_THRESHOLD
+#define OPENTHREAD_CONFIG_CHANNEL_MONITOR_RSSI_THRESHOLD        -75
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_CHANNEL_MONITOR_SAMPLE_WINDOW
+ *
+ * The averaging sample window length (in units of channel sample interval) used by Channel Monitoring feature.
+ *
+ * Channel monitoring will sample all channels every sample interval. It maintains the average rate of RSSI samples
+ * that are above the RSSI threshold within (approximately) this sample window.
+ *
+ * Applicable only if Channel Monitoring feature is enabled (i.e., `OPENTHREAD_ENABLE_CHANNEL_MONITOR` is set).
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CHANNEL_MONITOR_SAMPLE_WINDOW
+#define OPENTHREAD_CONFIG_CHANNEL_MONITOR_SAMPLE_WINDOW         960
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_CHILD_SUPERVISION_INTERVAL
  *
  * The default supervision interval in seconds used by parent. Set to zero to disable the supervision process on the
@@ -941,6 +1042,64 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_ENABLE_PERIODIC_PARENT_SEARCH
+ *
+ * Define as 1 to enable periodic parent search feature.
+ *
+ * When this feature is enabled an end-device/child (while staying attached) will periodically search for a possible
+ * better parent and will switch parent if a better one is found.
+ *
+ * The child will periodically check the average RSS value for the current parent, and only if it is below a specific
+ * threshold, a parent search is performed. The `OPENTHREAD_CONFIG_PARENT_SEARCH_CHECK_INTERVAL` specifies the the
+ * check interval (in seconds) and `OPENTHREAD_CONFIG_PARENT_SEARCH_RSS_THRESHOLD` gives the RSS threshold.
+ *
+ * Since the parent search process can be power consuming (child needs to stays in RX mode to collect parent response)
+ * and to limit its impact on battery-powered devices, after a parent search is triggered, the child will not trigger
+ * another one before a specified backoff interval specified by `OPENTHREAD_CONFIG_PARENT_SEARCH_BACKOFF_INTERVAL`
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_ENABLE_PERIODIC_PARENT_SEARCH
+#define OPENTHREAD_CONFIG_ENABLE_PERIODIC_PARENT_SEARCH         0
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_PARENT_SEARCH_CHECK_INTERVAL
+ *
+ * Specifies the interval in seconds for a child to check the trigger condition to perform a parent search.
+ *
+ * Applicable only if periodic parent search feature is enabled (see `OPENTHREAD_CONFIG_ENABLE_PERIODIC_PARENT_SEARCH`).
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_PARENT_SEARCH_CHECK_INTERVAL
+#define OPENTHREAD_CONFIG_PARENT_SEARCH_CHECK_INTERVAL          (9 * 60)
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_PARENT_SEARCH_BACKOFF_INTERVAL
+ *
+ * Specifies the backoff interval in seconds for a child to not perform a parent search after triggering one.
+ *
+ * Applicable only if periodic parent search feature is enabled (see `OPENTHREAD_CONFIG_ENABLE_PERIODIC_PARENT_SEARCH`).
+ *
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_PARENT_SEARCH_BACKOFF_INTERVAL
+#define OPENTHREAD_CONFIG_PARENT_SEARCH_BACKOFF_INTERVAL        (10* 60 * 60)
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_PARENT_SEARCH_RSS_THRESHOLD
+ *
+ * Specifies the RSS threshold used to trigger a parent search.
+ *
+ * Applicable only if periodic parent search feature is enabled (see `OPENTHREAD_CONFIG_ENABLE_PERIODIC_PARENT_SEARCH`).
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_PARENT_SEARCH_RSS_THRESHOLD
+#define OPENTHREAD_CONFIG_PARENT_SEARCH_RSS_THRESHOLD           -65
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_NCP_ENABLE_PEEK_POKE
  *
  * Define as 1 to enable peek/poke functionality on NCP.
@@ -950,6 +1109,24 @@
  */
 #ifndef OPENTHREAD_CONFIG_NCP_ENABLE_PEEK_POKE
 #define OPENTHREAD_CONFIG_NCP_ENABLE_PEEK_POKE                  0
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_NCP_SPINEL_RESPONSE_QUEUE_SIZE
+ *
+ * Size of NCP Spinel command response queue.
+ *
+ * NCP guarantees that it can respond up to `OPENTHREAD_CONFIG_NCP_SPINEL_RESPONSE_QUEUE_SIZE` spinel commands at the
+ * same time. The spinel protocol defines a Transaction ID (TID) as part of spinel command frame (the TID can be
+ * a value 0-15 where TID 0 is used for frames which require no response). Spinel protocol can support at most support
+ * 15 simultaneous commands.
+ *
+ * The host driver implementation may further limit the number of simultaneous Spinel command frames (e.g., wpantund
+ * limits this to two). This configuration option can be used to reduce the response queue size.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_NCP_SPINEL_RESPONSE_QUEUE_SIZE
+#define OPENTHREAD_CONFIG_NCP_SPINEL_RESPONSE_QUEUE_SIZE        15
 #endif
 
 /**
@@ -973,7 +1150,27 @@
 #define OPENTHREAD_CONFIG_MLE_SEND_LINK_REQUEST_ON_ADV_TIMEOUT  0
 #endif
 
-/*
+/**
+ * @def OPENTHREAD_CONFIG_MLE_LINK_REQUEST_MARGIN_MIN
+ *
+ * Specifies the minimum link margin in dBm required before attempting to establish a link with a neighboring router.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_MLE_LINK_REQUEST_MARGIN_MIN
+#define OPENTHREAD_CONFIG_MLE_LINK_REQUEST_MARGIN_MIN           10
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_MLE_PARTITION_MERGE_MARGIN_MIN
+ *
+ * Specifies the minimum link margin in dBm required before attempting to merge to a different partition.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_MLE_PARTITION_MERGE_MARGIN_MIN
+#define OPENTHREAD_CONFIG_MLE_PARTITION_MERGE_MARGIN_MIN        10
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_ENABLE_DEBUG_UART
  *
  * Enable the "Debug Uart" platform feature.
@@ -1006,6 +1203,16 @@
  */
 #ifndef OPENTHREAD_CONFIG_ENABLE_DYNAMIC_MPL_INTERVAL
 #define OPENTHREAD_CONFIG_ENABLE_DYNAMIC_MPL_INTERVAL           0
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_DISABLE_CCA_ON_LAST_ATTEMPT
+ *
+ * Define as 1 to disable CCA on the last transmit attempt
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_DISABLE_CCA_ON_LAST_ATTEMPT
+#define OPENTHREAD_CONFIG_DISABLE_CCA_ON_LAST_ATTEMPT           0
 #endif
 
 #endif  // OPENTHREAD_CORE_DEFAULT_CONFIG_H_
