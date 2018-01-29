@@ -52,6 +52,7 @@ const TimerScheduler::AlarmApi TimerMilliScheduler::sAlarmMilliApi =
 bool Timer::DoesFireBefore(const Timer &aSecondTimer, uint32_t aNow)
 {
     bool retval;
+    /* FireTIme>=Now，则isBeforeNow == 0 */
     bool isBeforeNow = TimerScheduler::IsStrictlyBefore(GetFireTime(), aNow);
 
     // Check if one timer is before `now` and the other one is not.
