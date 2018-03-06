@@ -42,12 +42,8 @@
 
 namespace ot {
 
-const TimerScheduler::AlarmApi TimerMilliScheduler::sAlarmMilliApi =
-{
-    &otPlatAlarmMilliStartAt,
-    &otPlatAlarmMilliStop,
-    &otPlatAlarmMilliGetNow
-};
+const TimerScheduler::AlarmApi TimerMilliScheduler::sAlarmMilliApi = {&otPlatAlarmMilliStartAt, &otPlatAlarmMilliStop,
+                                                                      &otPlatAlarmMilliGetNow};
 
 bool Timer::DoesFireBefore(const Timer &aSecondTimer, uint32_t aNow)
 {
@@ -97,7 +93,7 @@ void TimerScheduler::Add(Timer &aTimer, const AlarmApi &aAlarmApi)
 
     if (mHead == NULL)
     {
-        mHead = &aTimer;
+        mHead        = &aTimer;
         aTimer.mNext = NULL;
         SetAlarm(aAlarmApi);
     }
@@ -113,12 +109,12 @@ void TimerScheduler::Add(Timer &aTimer, const AlarmApi &aAlarmApi)
                 if (prev)
                 {
                     aTimer.mNext = cur;
-                    prev->mNext = &aTimer;
+                    prev->mNext  = &aTimer;
                 }
                 else
                 {
                     aTimer.mNext = mHead;
-                    mHead = &aTimer;
+                    mHead        = &aTimer;
                     SetAlarm(aAlarmApi);
                 }
 
@@ -130,7 +126,7 @@ void TimerScheduler::Add(Timer &aTimer, const AlarmApi &aAlarmApi)
 
         if (cur == NULL)
         {
-            prev->mNext = &aTimer;
+            prev->mNext  = &aTimer;
             aTimer.mNext = NULL;
         }
     }
@@ -171,7 +167,7 @@ void TimerScheduler::SetAlarm(const AlarmApi &aAlarmApi)
     }
     else
     {
-        uint32_t now = aAlarmApi.AlarmGetNow();
+        uint32_t now       = aAlarmApi.AlarmGetNow();
         uint32_t remaining = IsStrictlyBefore(now, mHead->mFireTime) ? (mHead->mFireTime - now) : 0;
 
         aAlarmApi.AlarmStartAt(&GetInstance(), now, remaining);
@@ -224,12 +220,8 @@ exit:
 }
 
 #if OPENTHREAD_CONFIG_ENABLE_PLATFORM_USEC_TIMER
-const TimerScheduler::AlarmApi TimerMicroScheduler::sAlarmMicroApi =
-{
-    &otPlatAlarmMicroStartAt,
-    &otPlatAlarmMicroStop,
-    &otPlatAlarmMicroGetNow
-};
+const TimerScheduler::AlarmApi TimerMicroScheduler::sAlarmMicroApi = {&otPlatAlarmMicroStartAt, &otPlatAlarmMicroStop,
+                                                                      &otPlatAlarmMicroGetNow};
 
 void TimerMicro::StartAt(uint32_t aT0, uint32_t aDt)
 {
@@ -260,4 +252,4 @@ exit:
 }
 #endif // OPENTHREAD_CONFIG_ENABLE_PLATFORM_USEC_TIMER
 
-}  // namespace ot
+} // namespace ot

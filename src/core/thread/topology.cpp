@@ -44,10 +44,7 @@ namespace ot {
 
 void Neighbor::GenerateChallenge(void)
 {
-    for (uint8_t i = 0; i < sizeof(mValidPending.mPending.mChallenge); i++)
-    {
-        mValidPending.mPending.mChallenge[i] = static_cast<uint8_t>(otPlatRandomGet());
-    }
+    Random::FillBuffer(mValidPending.mPending.mChallenge, sizeof(mValidPending.mPending.mChallenge));
 }
 
 void Child::ClearIp6Addresses(void)
@@ -95,7 +92,7 @@ exit:
 
 otError Child::GetNextIp6Address(Instance &aInstance, Ip6AddressIterator &aIterator, Ip6::Address &aAddress) const
 {
-    otError error = OT_ERROR_NONE;
+    otError                   error = OT_ERROR_NONE;
     otChildIp6AddressIterator index;
 
     // Index zero corresponds to the Mesh Local IPv6 address (if any).
@@ -150,7 +147,7 @@ exit:
 
 otError Child::RemoveIp6Address(Instance &aInstance, const Ip6::Address &aAddress)
 {
-    otError error = OT_ERROR_NOT_FOUND;
+    otError  error = OT_ERROR_NOT_FOUND;
     uint16_t index;
 
     VerifyOrExit(!aAddress.IsUnspecified(), error = OT_ERROR_INVALID_ARGS);
@@ -218,26 +215,21 @@ exit:
 
 void Child::GenerateChallenge(void)
 {
-    for (uint8_t i = 0; i < sizeof(mAttachChallenge); i++)
-    {
-        mAttachChallenge[i] = static_cast<uint8_t>(otPlatRandomGet());
-    }
+    Random::FillBuffer(mAttachChallenge, sizeof(mAttachChallenge));
 }
 
 const Mac::Address &Child::GetMacAddress(Mac::Address &aMacAddress) const
 {
     if (mUseShortAddress)
     {
-        aMacAddress.mShortAddress = GetRloc16();
-        aMacAddress.mLength = sizeof(aMacAddress.mShortAddress);
+        aMacAddress.SetShort(GetRloc16());
     }
     else
     {
-        aMacAddress.mExtAddress = GetExtAddress();
-        aMacAddress.mLength = sizeof(aMacAddress.mExtAddress);
+        aMacAddress.SetExtended(GetExtAddress());
     }
 
     return aMacAddress;
 }
 
-}  // namespace ot
+} // namespace ot

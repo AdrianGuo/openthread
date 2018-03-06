@@ -41,7 +41,6 @@ override CXXFLAGS                            := $(filter-out -pedantic-errors,$(
 EFR32MG_SDK_SRCDIR                            = $(top_srcdir)/third_party/silabs/gecko_sdk_suite/v2.0
 
 libopenthread_efr32_a_CPPFLAGS                                                = \
-    -DEFR32MG12P432F1024GL125                                                   \
     -D__START=main                                                              \
     -D__STARTUP_CLEAR_BSS                                                       \
     -I$(top_srcdir)/include                                                     \
@@ -55,7 +54,7 @@ libopenthread_efr32_a_CPPFLAGS                                                = 
     -I$(EFR32MG_SDK_SRCDIR)/platform/radio/rail_lib/hal/efr32                   \
     -I$(EFR32MG_SDK_SRCDIR)/platform/radio/rail_lib/plugin/pa-conversions       \
     -I$(EFR32MG_SDK_SRCDIR)/hardware/kit/common/bsp                             \
-    -I$(EFR32MG_SDK_SRCDIR)/hardware/kit/EFR32MG12_BRD4161A/config              \
+    -I$(EFR32MG_SDK_SRCDIR)/hardware/kit/EFR32MG12_$(BOARD)/config              \
     -I$(EFR32MG_SDK_SRCDIR)/platform/CMSIS/Include                              \
     -I$(EFR32MG_SDK_SRCDIR)/platform/Device/SiliconLabs/EFR32MG12P/Include      \
     -I$(EFR32MG_SDK_SRCDIR)/platform/emdrv/common/inc                           \
@@ -73,6 +72,7 @@ libopenthread_efr32_a_CPPFLAGS                                                = 
 
 PLATFORM_SOURCES                                                              = \
     alarm.c                                                                     \
+    diag.c                                                                      \
     flash.c                                                                     \
     logging.c                                                                   \
     misc.c                                                                      \
@@ -82,12 +82,6 @@ PLATFORM_SOURCES                                                              = 
     startup-gcc.c                                                               \
     uart.c                                                                      \
     $(NULL)
-
-if OPENTHREAD_ENABLE_DIAG
-PLATFORM_SOURCES                                                             += \
-    diag.c                                                                      \
-    $(NULL)
-endif
 
 nodist_libopenthread_efr32_a_SOURCES                                                                                           =  \
     @top_builddir@/third_party/silabs/gecko_sdk_suite/v2.0/hardware/kit/common/bsp/bsp_bcc.c                                      \
@@ -129,6 +123,7 @@ libopenthread_efr32_a_SOURCES                                                 = 
 
 PRETTY_FILES                                                                  = \
     $(PLATFORM_SOURCES)                                                         \
+    $(noinst_HEADERS)                                                           \
     $(NULL)
 
 Dash                                                                          = -
